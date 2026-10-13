@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Atlas Anatómico 3D</title>
+  <meta name="description" content="Modelo 3D interactivo de la anatomía humana masculina y femenina para estudiar, con descripciones de cada estructura.">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='12' r='8' fill='%23e8dfc8'/%3E%3Cpath d='M20 24h24l-4 18h-4l-2 18h-4l-2-18h-4z' fill='%23e8dfc8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="Modelo anatómico 3D interactivo"></canvas>
+
+  <!-- Barra superior -->
+  <header class="topbar">
+    <button class="icon-btn only-mobile" id="btn-menu" aria-label="Abrir menú" title="Menú">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Atlas Anatómico <b>3D</b></span>
+    </div>
+    <div class="segmented" role="radiogroup" aria-label="Sexo del modelo">
+      <button role="radio" aria-checked="true" data-sex="M" class="active">Masculino</button>
+      <button role="radio" aria-checked="false" data-sex="F">Femenino</button>
+    </div>
+    <button class="icon-btn" id="btn-help" aria-label="Ayuda" title="Ayuda">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.6M12 16.8v.2"/></svg>
+    </button>
+  </header>
+
+  <!-- Panel izquierdo: sistemas e índice -->
+  <aside class="panel left" id="panel-left" aria-label="Sistemas y estructuras">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" class="active" data-tab="systems">Sistemas</button>
+      <button role="tab" aria-selected="false" data-tab="index">Índice</button>
+    </div>
+    <div class="tab-body" id="tab-systems">
+      <ul class="systems" id="systems-list"></ul>
+      <div class="row-actions">
+        <button class="chip-btn" id="btn-all-on">Mostrar todo</button>
+        <button class="chip-btn" id="btn-all-off">Ocultar todo</button>
+      </div>
+    </div>
+    <div class="tab-body hidden" id="tab-index">
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        <input id="search" type="search" placeholder="Buscar estructura…" autocomplete="off" aria-label="Buscar estructura">
+      </label>
+      <div class="index-list" id="index-list"></div>
+    </div>
+  </aside>
+
+  <!-- Panel derecho: información -->
+  <aside class="panel right" id="panel-info" aria-live="polite">
+    <div class="info-empty" id="info-empty">
+      <div class="hint-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M9 3v8.5M9 11.5V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14a1.6 1.6 0 0 1 2.6-1.8L9 15"/></svg>
+      </div>
+      <p><b>Selecciona una estructura</b> haciendo clic sobre el modelo o búscala en el índice.</p>
+      <p class="muted small">Arrastra para girar · Rueda o pellizco para acercar · Clic derecho o dos dedos para desplazar</p>
+    </div>
+    <div class="info hidden" id="info"></div>
+  </aside>
+
+  <!-- Barra inferior -->
+  <nav class="toolbar" aria-label="Vistas y herramientas">
+    <button class="tool" data-view="front" title="Vista anterior"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5"/><path d="M8 10h8l-1.5 6h-1.5l-.5 5h-1l-.5-5H9.5z"/></svg><span>Anterior</span></button>
+    <button class="tool" data-view="back" title="Vista posterior"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5" fill="currentColor"/><path d="M8 10h8l-1.5 6h-1.5l-.5 5h-1l-.5-5H9.5z" fill="currentColor"/></svg><span>Posterior</span></button>
+    <button class="tool" data-view="left" title="Vista lateral izquierda"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5"/><path d="M11 10h3l.5 6-1.5.5-.5 4.5h-1.5l.3-5L10 15z"/><path d="M14 8.5h1.6" /></svg><span>Izquierda</span></button>
+    <button class="tool" data-view="right" title="Vista lateral derecha"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5"/><path d="M13 10h-3l-.5 6 1.5.5.5 4.5h1.5l-.3-5L14 15z"/><path d="M10 8.5H8.4"/></svg><span>Derecha</span></button>
+    <button class="tool" data-view="top" title="Vista superior"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/></svg><span>Superior</span></button>
+    <span class="sep" aria-hidden="true"></span>
+    <button class="tool toggle" id="btn-xray" title="Modo rayos X (X)"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 6v12M8 9h8M8.5 12h7M9 15h6"/></svg><span>Rayos X</span></button>
+    <button class="tool" id="btn-show-hidden" title="Mostrar estructuras ocultas"><svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Ocultas <em id="hidden-count">0</em></span></button>
+    <button class="tool" id="btn-reset" title="Restablecer vista"><svg viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg><span>Restablecer</span></button>
+    <span class="sep" aria-hidden="true"></span>
+    <button class="tool accent" id="btn-quiz" title="Modo estudio: autoevaluación"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 4l8 3.5-8 3.5z"/><path d="M7 9.2v4.3c0 1.5 2.2 3 5 3s5-1.5 5-3V9.2M20 7.5v5"/></svg><span>Estudiar</span></button>
+  </nav>
+
+  <div class="tooltip hidden" id="tooltip" role="tooltip"></div>
+
+  <div class="loading" id="loading">
+    <div class="loading-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>
+        <div class="loading-title" id="loading-title">Generando modelo anatómico…</div>
+        <div class="bar"><span id="loading-bar"></span></div>
+        <div class="muted small" id="loading-detail">Preparando</div>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="help" class="dialog">
+    <form method="dialog">
+      <h2>Cómo usar el atlas</h2>
+      <ul class="help-list">
+        <li><b>Girar:</b> arrastra con el ratón o un dedo. <b>Acercar:</b> rueda o pellizco. <b>Desplazar:</b> clic derecho o dos dedos.</li>
+        <li><b>Seleccionar:</b> haz clic en cualquier estructura para ver su descripción. Doble clic para centrarla.</li>
+        <li><b>Sistemas:</b> muestra u oculta cada sistema y ajusta su opacidad. La piel empieza semitransparente para ver el interior.</li>
+        <li><b>Índice:</b> busca cualquier estructura por su nombre.</li>
+        <li><b>Rayos X:</b> vuelve todo translúcido salvo la estructura seleccionada.</li>
+        <li><b>Estudiar:</b> autoevaluación; se resalta una estructura y debes identificarla.</li>
+        <li><b>Atajos:</b> <kbd>Esc</kbd> deseleccionar · <kbd>F</kbd> centrar · <kbd>I</kbd> aislar · <kbd>H</kbd> ocultar · <kbd>X</kbd> rayos X · <kbd>1</kbd>–<kbd>5</kbd> vistas</li>
+      </ul>
+      <p class="muted small">El modelo es una representación esquemática generada por ordenador con proporciones de un adulto medio; las descripciones siguen la Terminologia Anatomica. Es un recurso de estudio y no sustituye a los textos de referencia ni al consejo médico.</p>
+      <div class="dialog-actions"><button class="btn-primary" value="ok">Entendido</button></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><title>preview</title>
+<style>html,body{margin:0;height:100%;background:#15181d;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"../vendor/three/three.module.min.js"}}</script></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from '../vendor/three/addons/OrbitControls.js';
+const q = new URLSearchParams(location.search);
+const sex = q.get('sex') || 'M';
+const only = q.get('only') ? q.get('only').split(',') : undefined;
+const hideSys = (q.get('hide')||'').split(',');
+const view = q.get('view') || 'front';
+const tgt = (q.get('t') || '0,0.9,0').split(',').map(Number);
+const dist = Number(q.get('d') || 2.6);
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setSize(innerWidth, innerHeight); r.setPixelRatio(1); document.body.appendChild(r.domElement);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.01, 50);
+const dirs = { front: [0,0,1], back: [0,0,-1], left: [1,0,0], right: [-1,0,0], top: [0,1,0.001], fl: [0.7,0.1,0.7], bl:[0.7,0.1,-0.7] };
+const dv = dirs[view];
+cam.position.set(tgt[0] + dv[0]*dist, tgt[1] + dv[1]*dist, tgt[2] + dv[2]*dist);
+const ctl = new OrbitControls(cam, r.domElement); ctl.target.set(...tgt); ctl.update();
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.2));
+const dl = new THREE.DirectionalLight(0xffffff, 2.2); dl.position.set(1, 2, 3); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0xffffff, 0.8); dl2.position.set(-2, 1, -2); scene.add(dl2);
+const w = new Worker('../js/worker.js', { type: 'module' });
+const t0 = performance.now();
+w.onmessage = (e) => {
+  if (e.data.type === 'error') { document.title = 'ERROR'; console.error(e.data.message); window.__err = e.data.message; return; }
+  if (e.data.type !== 'done') return;
+  let nv = 0;
+  for (const p of e.data.parts) {
+    if (hideSys.includes(p.sys)) continue;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(p.pos, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(p.nor, 3));
+    g.setIndex(new THREE.BufferAttribute(p.idx, 1));
+    const op = Number(q.get('op_' + p.sys) || 1);
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: p.color || '#cccccc', roughness: 0.6, transparent: op < 1, opacity: op, depthWrite: op >= 1 }));
+    scene.add(m); nv += p.pos.length / 3;
+  }
+  window.__info = { ms: performance.now() - t0, parts: e.data.parts.length, nv };
+  document.title = 'READY';
+};
+w.postMessage({ sex, only, job: 1 });
+(function loop(){ requestAnimationFrame(loop); r.render(scene, cam); })();
+</script></body></html>
