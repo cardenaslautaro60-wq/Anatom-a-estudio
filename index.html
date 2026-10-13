@@ -76,11 +76,22 @@
     <button class="tool" data-view="top" title="Vista superior"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/></svg><span>Superior</span></button>
     <span class="sep" aria-hidden="true"></span>
     <button class="tool toggle" id="btn-xray" title="Modo rayos X (X)"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 6v12M8 9h8M8.5 12h7M9 15h6"/></svg><span>Rayos X</span></button>
+    <button class="tool toggle" id="btn-clip" title="Plano de corte"><svg viewBox="0 0 24 24"><path d="M4 20 20 4"/><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="2.5 2.5"/></svg><span>Corte</span></button>
     <button class="tool" id="btn-show-hidden" title="Mostrar estructuras ocultas"><svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Ocultas <em id="hidden-count">0</em></span></button>
     <button class="tool" id="btn-reset" title="Restablecer vista"><svg viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4h4"/></svg><span>Restablecer</span></button>
     <span class="sep" aria-hidden="true"></span>
     <button class="tool accent" id="btn-quiz" title="Modo estudio: autoevaluación"><svg viewBox="0 0 24 24"><path d="M4 7.5 12 4l8 3.5-8 3.5z"/><path d="M7 9.2v4.3c0 1.5 2.2 3 5 3s5-1.5 5-3V9.2M20 7.5v5"/></svg><span>Estudiar</span></button>
   </nav>
+
+  <div class="clip-panel hidden" id="clip-panel" role="group" aria-label="Plano de corte">
+    <div class="segmented small-seg">
+      <button data-axis="x" class="active">Sagital</button>
+      <button data-axis="z">Coronal</button>
+      <button data-axis="y">Transversal</button>
+    </div>
+    <input type="range" id="clip-range" min="0" max="1" step="0.005" value="0.5" aria-label="Posición del corte">
+    <button class="icon-btn" id="clip-flip" title="Invertir lado del corte" aria-label="Invertir lado del corte"><svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button>
+  </div>
 
   <div class="tooltip hidden" id="tooltip" role="tooltip"></div>
 
@@ -104,6 +115,8 @@
         <li><b>Sistemas:</b> muestra u oculta cada sistema y ajusta su opacidad. La piel empieza semitransparente para ver el interior.</li>
         <li><b>Índice:</b> busca cualquier estructura por su nombre.</li>
         <li><b>Rayos X:</b> vuelve todo translúcido salvo la estructura seleccionada.</li>
+        <li><b>Corte:</b> secciona el modelo con un plano sagital, coronal o transversal y desplázalo con el control deslizante.</li>
+        <li><b>Lados:</b> «izquierdo» y «derecho» se refieren siempre al lado del propio cuerpo (en la vista anterior, su izquierda aparece a tu derecha).</li>
         <li><b>Estudiar:</b> autoevaluación; se resalta una estructura y debes identificarla.</li>
         <li><b>Atajos:</b> <kbd>Esc</kbd> deseleccionar · <kbd>F</kbd> centrar · <kbd>I</kbd> aislar · <kbd>H</kbd> ocultar · <kbd>X</kbd> rayos X · <kbd>1</kbd>–<kbd>5</kbd> vistas</li>
       </ul>

@@ -39,6 +39,7 @@ const state = {
   xray: false,
   hovered: null,
   quiz: null,
+  clip: null, // { axis: 'x'|'y'|'z', t: 0..1, flip }
 };
 const model = () => state.models[state.sex];
 
@@ -102,11 +103,16 @@ function fitDistance(radius) {
   const hfov = Math.atan(Math.tan(vfov) * camera.aspect);
   return radius / Math.sin(Math.min(vfov, hfov)) * 1.04;
 }
-const VIEWS = { front: [0, 0, 1], back: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0], top: [0, 1, 0.0001] };
+const VIEWS = { front: [0, 0, 1], back: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0], top: [0, 1, -0.002] };
 function setView(name, instant = false) {
   const H = height();
   const target = new THREE.Vector3(0, H * 0.47, 0);
-  let dist = fitDistance(H * 0.56);
+  // Ajuste por altura (cuerpo) y por anchura (brazos), lo que sea más restrictivo
+  const vfov = THREE.MathUtils.degToRad(camera.fov) / 2;
+  const hfov = Math.atan(Math.tan(vfov) * camera.aspect);
+  const mobile = window.innerWidth <= 760;
+  let dist = Math.max((H * (mobile ? 0.6 : 0.56)) / Math.tan(vfov), (H * 0.27) / Math.tan(hfov));
+  if (name === 'left' || name === 'right') dist = Math.max((H * (mobile ? 0.6 : 0.56)) / Math.tan(vfov), (H * 0.2) / Math.tan(hfov));
   const d = VIEWS[name];
   const pos = new THREE.Vector3(d[0], d[1], d[2]).normalize().multiplyScalar(name === 'top' ? dist * 0.55 : dist).add(target);
   if (name === 'top') target.y = H * 0.75;
@@ -212,7 +218,7 @@ function setProgress(f, id) {
 }
 
 // ------------------------------------------------------------------ Visibilidad y resaltado
-const SEL = new THREE.Color('#ffb21f');
+const SEL = new THREE.Color('#22d3ff');
 const HOV = new THREE.Color('#4a86c8');
 const BLACK = new THREE.Color(0, 0, 0);
 function meshesOf(keys) {
@@ -245,9 +251,11 @@ function applyState() {
     mat.opacity = op;
     mat.depthWrite = !transp;
     const hov = state.hovered === mesh && !u.ghost;
-    if (isSel) mat.color.copy(u.base).lerp(SEL, 0.55); else mat.color.copy(u.base);
+    if (isSel) mat.color.copy(u.base).lerp(SEL, 0.6); else mat.color.copy(u.base);
     mat.emissive.copy(isSel ? SEL : hov ? HOV : BLACK);
-    mat.emissiveIntensity = isSel ? 0.28 : 0.4;
+    mat.emissiveIntensity = isSel ? 0.32 : 0.4;
+    const side = state.clip ? THREE.DoubleSide : THREE.FrontSide;
+    if (mat.side !== side) { mat.side = side; mat.needsUpdate = true; }
   }
   $('#hidden-count').textContent = state.hidden.size;
   requestRender();
@@ -272,7 +280,8 @@ function pick(clientX, clientY) {
     if (!mesh.geometry.boundsTree) mesh.geometry.computeBoundsTree();
     cands.push(mesh);
   }
-  const hits = raycaster.intersectObjects(cands, false);
+  let hits = raycaster.intersectObjects(cands, false);
+  if (state.clip) hits = hits.filter(h => clipPlane.distanceToPoint(h.point) >= 0);
   if (!hits.length) return null;
   const solid = hits.find(h => h.object.material.opacity >= 0.5);
   return (solid || hits[0]).object;
@@ -496,13 +505,14 @@ $('#btn-reset').addEventListener('click', () => {
   exitQuiz();
   state.sysVisible = { ...DEFAULT_VISIBLE };
   for (const s of SYSTEMS) state.sysOpacity[s.id] = DEFAULT_OPACITY[s.id] ?? 1;
-  state.hidden.clear(); state.xray = false; state.isolate = false; state.selection = null;
+  state.hidden.clear(); state.xray = false; state.isolate = false; state.selection = null; state.clip = null;
+  $('#btn-clip').classList.remove('on'); $('#clip-panel').classList.add('hidden'); renderer.clippingPlanes = [];
   $('#btn-xray').classList.remove('on');
   renderSystems(); renderInfo(); markIndex(); applyState(); setView('front');
 });
 $('#btn-help').addEventListener('click', () => $('#help').showModal());
-$('#btn-menu').addEventListener('click', () => $('#panel-left').classList.toggle('open'));
-function closeMobileMenu() { $('#panel-left').classList.remove('open'); }
+$('#btn-menu').addEventListener('click', () => { const open = $('#panel-left').classList.toggle('open'); document.body.classList.toggle('menu-open', open); });
+function closeMobileMenu() { $('#panel-left').classList.remove('open'); document.body.classList.remove('menu-open'); }
 
 // Cambio de sexo
 for (const b of document.querySelectorAll('[data-sex]')) b.addEventListener('click', () => switchSex(b.dataset.sex));
@@ -603,6 +613,36 @@ function answer(choice) {
   $('#quiz-see').onclick = () => { const id = q.id, k = [...q.keys][0]; exitQuiz(); select(id, k); };
   $('#quiz-next').focus();
 }
+
+// ------------------------------------------------------------------ Plano de corte
+const clipPlane = new THREE.Plane();
+const CLIP = { x: { n: [-1, 0, 0], range: [-0.36, 0.36], label: 'Sagital' }, z: { n: [0, 0, -1], range: [-0.16, 0.16], label: 'Coronal' }, y: { n: [0, -1, 0], range: [0.0, 1.8], label: 'Transversal' } };
+function updateClip() {
+  const c = state.clip;
+  if (!c) { renderer.clippingPlanes = []; applyState(); return; }
+  const def = CLIP[c.axis];
+  const H = height() / 1.75;
+  const v = (def.range[0] + (def.range[1] - def.range[0]) * c.t) * (c.axis === 'y' ? H : 1);
+  const n = new THREE.Vector3(...def.n).multiplyScalar(c.flip ? -1 : 1);
+  clipPlane.normal.copy(n);
+  clipPlane.constant = -n.dot(new THREE.Vector3(c.axis === 'x' ? v : 0, c.axis === 'y' ? v : 0, c.axis === 'z' ? v : 0));
+  renderer.clippingPlanes = [clipPlane];
+  applyState();
+}
+$('#btn-clip').addEventListener('click', () => {
+  state.clip = state.clip ? null : { axis: 'x', t: 0.5, flip: false };
+  $('#btn-clip').classList.toggle('on', !!state.clip);
+  $('#clip-panel').classList.toggle('hidden', !state.clip);
+  if (state.clip) syncClipUI();
+  updateClip();
+});
+function syncClipUI() {
+  for (const b of document.querySelectorAll('[data-axis]')) b.classList.toggle('active', b.dataset.axis === state.clip.axis);
+  $('#clip-range').value = String(state.clip.t);
+}
+for (const b of document.querySelectorAll('[data-axis]')) b.addEventListener('click', () => { state.clip.axis = b.dataset.axis; state.clip.t = 0.5; syncClipUI(); updateClip(); });
+$('#clip-range').addEventListener('input', (e) => { state.clip.t = Number(e.target.value); updateClip(); });
+$('#clip-flip').addEventListener('click', () => { state.clip.flip = !state.clip.flip; updateClip(); });
 
 // ------------------------------------------------------------------ Teclado
 window.addEventListener('keydown', (e) => {

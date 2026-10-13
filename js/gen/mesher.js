@@ -16,6 +16,7 @@ export function meshSDF(f, h, opts = {}) {
   const S = BS + 1, S2 = S * S;
   const rBlock = Math.sqrt(3) * BS * h * 0.5;
   const skip = rBlock * 1.3 + 2 * h;
+  const subSkip = rBlock * 0.5 * 1.6 + 2 * h;
 
   const pos = [], nor = [];
   const vmap = new Map();
@@ -30,17 +31,25 @@ export function meshSDF(f, h, opts = {}) {
     const dc = f(cx, cy, cz);
     if (Math.abs(dc) > skip) continue;
     const g = f.sp ? f.sp(cx, cy, cz, rBlock + 2 * h) : f;
-    // Muestreo
+    // Muestreo en dos niveles: subbloques de 4 celdas descartados si están lejos de la superficie
+    evalBlock.fill(NaN);
     let hasNeg = false, hasPos = false;
-    for (let k = 0; k < S; k++) {
-      const z = z0 + (ck + k) * h;
-      for (let j = 0; j < S; j++) {
-        const y = y0 + (cj + j) * h;
-        let o = k * S2 + j * S;
-        for (let i = 0; i < S; i++) {
-          const v = g(x0 + (ci + i) * h, y, z);
-          evalBlock[o + i] = v;
-          if (v < 0) hasNeg = true; else hasPos = true;
+    const HB = BS / 2;
+    for (let sk = 0; sk < 2; sk++) for (let sj = 0; sj < 2; sj++) for (let si = 0; si < 2; si++) {
+      const scx = x0 + (ci + si * HB + HB / 2) * h, scy = y0 + (cj + sj * HB + HB / 2) * h, scz = z0 + (ck + sk * HB + HB / 2) * h;
+      const ds = g(scx, scy, scz);
+      if (Math.abs(ds) > subSkip) continue;
+      for (let k = sk * HB; k <= sk * HB + HB; k++) {
+        const z = z0 + (ck + k) * h;
+        for (let j = sj * HB; j <= sj * HB + HB; j++) {
+          const y = y0 + (cj + j) * h;
+          const o = k * S2 + j * S;
+          for (let i = si * HB; i <= si * HB + HB; i++) {
+            if (evalBlock[o + i] === evalBlock[o + i]) continue; // ya evaluado
+            const v = g(x0 + (ci + i) * h, y, z);
+            evalBlock[o + i] = v;
+            if (v < 0) hasNeg = true; else hasPos = true;
+          }
         }
       }
     }
@@ -54,6 +63,7 @@ export function meshSDF(f, h, opts = {}) {
       if (v0 < 0) mask |= 1; if (v1 < 0) mask |= 2; if (v2 < 0) mask |= 4; if (v3 < 0) mask |= 8;
       if (v4 < 0) mask |= 16; if (v5 < 0) mask |= 32; if (v6 < 0) mask |= 64; if (v7 < 0) mask |= 128;
       if (mask === 0 || mask === 255) continue;
+      if (v0 !== v0 || v1 !== v1 || v2 !== v2 || v3 !== v3 || v4 !== v4 || v5 !== v5 || v6 !== v6 || v7 !== v7) continue;
       // Promedio de cruces en las 12 aristas
       let sx = 0, sy = 0, sz = 0, cnt = 0;
       const vs = [v0, v1, v2, v3, v4, v5, v6, v7];

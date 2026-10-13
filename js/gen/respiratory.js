@@ -134,6 +134,6 @@ export function buildRespiratory(R) {
     { id: 'pulmon-izquierdo-superior', color: LUNG.sup }, { id: 'pulmon-izquierdo-inferior', color: LUNG.inf },
   ], () => splitByClass(meshSDF(lungSDF(1), 0.0026), 2, lobeL), { weight: 2 });
 
-  R.sdf('diafragma', SYS, diaphragmSDF(), 0.0024, { color: '#b8504a' });
+  R.sdf('diafragma', SYS, diaphragmSDF(), 0.0024, { color: '#c4695d' });
   void ellipsoidAxis; void ssub;
 }

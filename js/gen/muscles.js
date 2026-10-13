@@ -115,7 +115,7 @@ function clipSkin(f, skin, inset = 0.0015) {
 
 export function buildMuscles(R) {
   const skin = skinSDF(R.sex, { noBreasts: true, noGenitals: true });
-  const H = 0.0032;
+  const H = 0.0035;
   const add = (id, f, h = H, o = {}) => R.bi(id, SYS, f, h, { color: o.color || nextColor(), label: o.label });
 
   // ---------------- Mapas ----------------

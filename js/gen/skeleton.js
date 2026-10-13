@@ -110,7 +110,7 @@ function skull(R) {
   }));
   const regs = order.map(o => o[1]);
   R.group(SYS, defs, () => {
-    const g = meshSDF(S, 0.0019);
+    const g = meshSDF(S, 0.0021);
     return splitByClass(g, regs.length, (x, y, z) => {
       for (let i = 0; i < regs.length; i++) if (regs[i](x, y, z) < 0) return i;
       return regs.length - 1;
@@ -120,7 +120,7 @@ function skull(R) {
   // Mandíbula
   R.sdf('mandibula', SYS, mandibleSDF(), 0.0017, { color: BONE });
   // Dientes
-  R.sdf('dientes', SYS, teethSDF(), 0.0009, { color: '#f4f0e6' });
+  R.sdf('dientes', SYS, teethSDF(), 0.001, { color: '#f4f0e6' });
   // Hioides
   R.geom('hioides', SYS, () => tube(smoothPath([[-0.021, 1.518, 0.004], [-0.012, 1.514, 0.024], [0, 1.512, 0.031], [0.012, 1.514, 0.024], [0.021, 1.518, 0.004]], 0.002), t => 0.0026 - 0.001 * Math.abs(t - 0.5), { radial: 10 }), { color: BONE });
 }
@@ -241,7 +241,7 @@ function spine(R) {
     if (name === 'C1') id = 'atlas';
     if (name === 'C2') id = 'axis';
     if (name === 'C7') id = 'vertebra-prominente';
-    R.sdf(id, SYS, vertebraSDF(name), 0.0014, { color: BONE, label: `Vértebra ${name}`, n: name });
+    R.sdf(id, SYS, vertebraSDF(name), 0.0016, { color: BONE, label: `Vértebra ${name}`, n: name });
   }
   // Discos intervertebrales
   const discs = [];
@@ -256,7 +256,7 @@ function spine(R) {
   const l5 = vertDims('L5');
   const top = V.L5.y - l5.hh, bot = SACRUM.base[1];
   discs.push(ellCyl([0, (top + bot) / 2, -0.042], 0.022, 0.0155, (top - bot) / 2 - 0.0003, 0.0015, basisEuler(0.12, 0, 0)));
-  R.sdf('disco-intervertebral', SYS, union(...discs), 0.0016, { color: '#b7c9d3' });
+  R.sdf('disco-intervertebral', SYS, union(...discs), 0.002, { color: '#b7c9d3' });
 
   // Sacro
   const a = SACRUM.base, b = SACRUM.apex;
@@ -283,7 +283,7 @@ function spine(R) {
     for (const s of [1, -1]) foramina.push(capsule(add3(c, [0.016 * s * (1 - 0.35 * t), 0, 0.02]), add3(c, [0.016 * s * (1 - 0.35 * t), 0, -0.02]), 0.0032 - 0.0006 * i));
   }
   sac = sub(sac, ...foramina);
-  R.sdf('sacro', SYS, sac, 0.0017, { color: BONE });
+  R.sdf('sacro', SYS, sac, 0.0019, { color: BONE });
   // Cóccix
   const cc = [];
   const c0 = SACRUM.apex, c1 = SACRUM.coccyxTip;
@@ -487,7 +487,7 @@ const ORD = ['1.er', '2.º', '3.er', '4.º', '5.º'];
 function upperLimb(R) {
   const H = 0.0022;
   R.biGeom('clavicula', SYS, () => tube(smoothPath(claviclePts(), 0.003), t => 0.0078 - 0.0022 * t, { radial: 14, flat: 0.82, up: [0, 0.3, 1] }), { color: BONE });
-  R.bi('escapula', SYS, scapulaSDF(), 0.0016, { color: BONE });
+  R.bi('escapula', SYS, scapulaSDF(), 0.0018, { color: BONE });
   R.bi('humero', SYS, humerusSDF(), H, { color: BONE });
   R.bi('cubito', SYS, ulnaSDF(), 0.0017, { color: BONE });
   R.bi('radio', SYS, radiusSDF(), 0.0017, { color: BONE });
@@ -497,14 +497,14 @@ function upperLimb(R) {
     let f = ellipsoid(handPt(al, lat, palm), r, hb);
     if (id === 'ganchoso') f = sunion(0.003, f, sphere(handPt(al + 0.003, lat + 0.001, 0.0075), 0.0028));
     if (id === 'escafoides') f = sunion(0.003, f, sphere(handPt(al + 0.006, lat + 0.004, 0.006), 0.003));
-    R.bi(id, SYS, f, 0.0009, { color: BONE });
+    R.bi(id, SYS, f, 0.0011, { color: BONE });
   }
   for (let i = 0; i < 5; i++) {
     const J = fingerJoints(i);
     const F = FINGERS[i];
     const rs = i === 0 ? 1.15 : i === 4 ? 0.88 : 1;
     const mc = sunion(0.003, roundCone(J[0], J[1], 0.0048 * rs, 0.0033 * rs), sphere(J[0], 0.005 * rs), sphere(madd(J[1], normalize(sub3(J[0], J[1])), 0.002), 0.0046 * rs));
-    R.bi('metacarpianos', SYS, mc, 0.001, { color: BONE, label: `${ORD[i]} metacarpiano (${FINGER_NAMES[i]})`, n: 'mc' + i });
+    R.bi('metacarpianos', SYS, mc, 0.0012, { color: BONE, label: `${ORD[i]} metacarpiano (${FINGER_NAMES[i]})`, n: 'mc' + i });
     const names = i === 0 ? ['proximal', 'distal'] : ['proximal', 'media', 'distal'];
     for (let j = 0; j < F.ph.length; j++) {
       const a = J[j + 1], b = J[j + 2];
@@ -512,7 +512,7 @@ function upperLimb(R) {
       const a2 = madd(a, dir, 0.0016), b2 = madd(b, dir, -0.0012);
       const r0 = (0.0045 - j * 0.0007) * rs, r1 = (0.0034 - j * 0.0005) * rs;
       const f = sunion(0.002, roundCone(a2, b2, r0, r1), sphere(madd(a2, dir, 0.001), r0 * 1.05));
-      R.bi('falanges-mano', SYS, f, 0.0009, { color: BONE, label: `Falange ${names[j]} · ${FINGER_NAMES[i]}`, n: `f${i}${j}` });
+      R.bi('falanges-mano', SYS, f, 0.0011, { color: BONE, label: `Falange ${names[j]} · ${FINGER_NAMES[i]}`, n: `f${i}${j}` });
     }
   }
 }
@@ -611,15 +611,15 @@ const TOES = [
 ];
 
 function lowerLimb(R) {
-  R.bi('femur', SYS, femurSDF(), 0.0025, { color: BONE });
+  R.bi('femur', SYS, femurSDF(), 0.0026, { color: BONE });
   R.bi('rotula', SYS, patellaSDF(), 0.0015, { color: BONE });
-  R.bi('tibia', SYS, tibiaSDF(), 0.0022, { color: BONE });
+  R.bi('tibia', SYS, tibiaSDF(), 0.0024, { color: BONE });
   R.bi('perone', SYS, fibulaSDF(), 0.0016, { color: BONE });
-  for (const [id, mk] of TARSALS) R.bi(id, SYS, mk(), 0.0012, { color: BONE });
+  for (const [id, mk] of TARSALS) R.bi(id, SYS, mk(), 0.0014, { color: BONE });
   MT.forEach(([a, b, r, rh], i) => {
     let f = sunion(0.003, roundCone(a, b, r * 1.25, r), sphere(b, rh));
     if (i === 4) f = sunion(0.003, f, sphere([0.124, 0.025, 0.046], 0.0062));
-    R.bi('metatarsianos', SYS, f, 0.0011, { color: BONE, label: `${ORD[i]} metatarsiano`, n: 'mt' + i });
+    R.bi('metatarsianos', SYS, f, 0.0013, { color: BONE, label: `${ORD[i]} metatarsiano`, n: 'mt' + i });
   });
   TOES.forEach(([start, lens, r], i) => {
     let p = start;
@@ -629,7 +629,7 @@ function lowerLimb(R) {
       const q = madd(p, dir, L);
       const rr = r * (1 - j * 0.12);
       const f = sunion(0.002, roundCone(madd(p, dir, 0.0012), madd(q, dir, -0.001), rr, rr * 0.82), sphere(madd(p, dir, 0.002), rr * 1.05));
-      R.bi('falanges-pie', SYS, f, 0.001, { color: BONE, label: `Falange ${names[j]} · ${TOE_NAMES[i]}`, n: `p${i}${j}` });
+      R.bi('falanges-pie', SYS, f, 0.0012, { color: BONE, label: `Falange ${names[j]} · ${TOE_NAMES[i]}`, n: `p${i}${j}` });
       p = madd(q, dir, 0.0015);
     });
   });

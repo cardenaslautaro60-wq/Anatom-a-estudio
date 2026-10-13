@@ -164,6 +164,18 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .tool em { font-style: normal; font-variant-numeric: tabular-nums; }
 .sep { width: 1px; height: 28px; background: var(--line); margin: 0 4px; flex: none; }
 
+/* ---------- Plano de corte ---------- */
+.clip-panel {
+  position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); z-index: 5;
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 14px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.clip-panel .segmented { margin: 0; }
+.small-seg button { padding: 5px 10px; font-size: 12.5px; }
+.clip-panel input[type=range] { width: 200px; accent-color: var(--accent); }
+.clip-panel .icon-btn { width: 32px; height: 32px; }
+
 /* ---------- Tooltip y carga ---------- */
 .tooltip { position: fixed; z-index: 6; pointer-events: none; padding: 4px 9px; border-radius: 8px; background: rgba(10, 12, 15, 0.9); border: 1px solid var(--line-2); font-size: 12.5px; white-space: nowrap; transform: translate(12px, 12px); }
 .loading { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(12, 14, 18, 0.35); transition: opacity .3s; }
@@ -196,9 +208,15 @@ kbd { font: 12px var(--font); border: 1px solid var(--line-2); border-bottom-wid
   .panel.left.open { transform: none; opacity: 1; pointer-events: auto; }
   .panel.right { top: auto; bottom: 78px; left: 8px; right: 8px; width: auto; max-height: 44%; }
   .panel.right.empty { display: none; }
-  .toolbar { bottom: 8px; }
-  .tool { min-width: 54px; }
-  .tool span { font-size: 10px; }
+  .toolbar { bottom: 8px; gap: 0; padding: 4px; }
+  .tool { min-width: 36px; padding: 8px 4px; }
+  .tool span { display: none; }
+  .tool #hidden-count { display: none; }
+  .sep { margin: 0 2px; height: 22px; }
+  body.menu-open .panel.right { display: none; }
+  .clip-panel { bottom: 62px; width: calc(100% - 16px); }
+  .clip-panel input[type=range] { flex: 1; width: auto; min-width: 60px; }
+  .panel.left.open { z-index: 7; }
   .loading-card { min-width: 0; width: calc(100% - 32px); }
   .bar { width: 100%; }
 }
