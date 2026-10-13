@@ -4,7 +4,7 @@ Modelo 3D interactivo de la anatomía humana **masculina y femenina** pensado pa
 
 ## Qué incluye
 
-- **11 sistemas** y **232 estructuras** diferentes (más de 470 piezas contando lados y vértebras):
+- **11 sistemas** y **234 estructuras** diferentes (más de 470 piezas contando lados y vértebras):
   - Tegumentario (piel).
   - Esquelético: huesos del cráneo por separado, mandíbula, dientes, hioides, las 24 vértebras presacras una a una, discos, sacro, cóccix, 12 pares de costillas, cartílagos costales, esternón, cinturas y todos los huesos de los miembros, incluidos carpo, metacarpo, tarso, metatarso y falanges.
   - Muscular: principales músculos superficiales y algunos profundos (iliopsoas, erector de la columna, intercostales, suelo pélvico…).

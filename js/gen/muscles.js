@@ -142,7 +142,7 @@ export function buildMuscles(R) {
 
   // ---------------- Tronco posterior ----------------
   const trap = [[0.471, 0.345], [0.42, 0.44], [0.37, 0.53], [0.33, 0.585], [0.27, 0.615], [0.245, 0.64], [0.255, 0.66], [0.32, 0.665], [0.375, 0.7], [0.405, 0.775], [0.471, 0.795]];
-  add('trapecio', surfMuscle(skin, T, [trap], { thick: 0.011, ramp: 0.03, maxRho: 0.24 }));
+  add('musculo-trapecio', surfMuscle(skin, T, [trap], { thick: 0.011, ramp: 0.03, maxRho: 0.24 }));
   const lat = [[0.471, 0.33], [0.418, 0.43], [0.367, 0.518], [0.326, 0.57], [0.3, 0.585], [0.278, 0.585], [0.258, 0.555], [0.262, 0.45], [0.29, 0.28], [0.34, 0.2], [0.42, 0.172], [0.471, 0.172]];
   add('dorsal-ancho', surfMuscle(skin, T, [lat], { thick: 0.009, exclude: [trap], maxRho: 0.24 }));
   const infra = [[0.37, 0.535], [0.335, 0.583], [0.3, 0.585], [0.312, 0.55], [0.34, 0.52]];
@@ -166,7 +166,7 @@ export function buildMuscles(R) {
     f.sp = (cx, cy, cz, r) => make(skin.sp(cx, cy, cz, r + 0.02));
     return f;
   };
-  add('temporal', headShell(ellipsoid([0.074, 1.668, -0.002], [0.025, 0.045, 0.05]), 0.0012, 0.006), 0.0022);
+  add('musculo-temporal', headShell(ellipsoid([0.074, 1.668, -0.002], [0.025, 0.045, 0.05]), 0.0012, 0.006), 0.0022);
   add('masetero', clipSkin(ellipsoid([0.053, 1.578, 0.022], [0.0115, 0.027, 0.0155], basisEuler(0.25, 0, 0)), skin, 0.002), 0.0018);
   const frontalis = (() => { const e = ellipsoid([0.028, 1.708, 0.07], [0.034, 0.04, 0.05]); const f = (x, y, z) => Math.max(e(x, y, z), 0.0 - x * 50 > 0 ? 0.01 : -1); f.b = e.b; return f; })();
   add('occipitofrontal', headShell(frontalis, 0.0008, 0.0025), 0.002);

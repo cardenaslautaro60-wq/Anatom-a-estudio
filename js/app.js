@@ -129,8 +129,11 @@ function focusKeys(keys, auto = false) {
   if (auto) {
     // Mirar la estructura desde el lado del cuerpo en el que se encuentra
     const c = sphere.center;
-    const out = new THREE.Vector3(c.x * 1.4, 0, c.z + 0.01);
-    if (out.length() > 0.035) dir = out.normalize().add(new THREE.Vector3(0, 0.22, 0)).normalize();
+    const k = state.sex === 'F' ? FEMALE_SCALE : 1;
+    const ax = Math.abs(c.x) / k;
+    const zs = c.z / k > -0.035 ? 1 : -1;
+    if (ax > 0.165 && c.y / k > 0.6) dir = new THREE.Vector3(Math.sign(c.x) * 0.75, 0.15, zs * 0.65).normalize(); // miembro superior
+    else dir = new THREE.Vector3(c.x * 2.2, 0.18, zs).normalize();
   }
   const dist = fitDistance(r) * 1.35;
   flyTo(sphere.center.clone().add(dir.multiplyScalar(dist)), sphere.center.clone());

@@ -106,7 +106,7 @@ function skull(R) {
     id: id === 'esfenoides-base' ? 'esfenoides' : id,
     side: side === 'L+R' ? null : side,
     n: id === 'esfenoides-base' ? 'base' : undefined,
-    label: id === 'esfenoides-base' ? 'Esfenoides (cuerpo y alas, base del cráneo)' : null,
+    label: id === 'esfenoides-base' ? 'Esfenoides (cuerpo y base del cráneo)' : id === 'esfenoides' ? 'Esfenoides (ala mayor)' : null,
   }));
   const regs = order.map(o => o[1]);
   R.group(SYS, defs, () => {

@@ -24,6 +24,12 @@ export default {
     t: [['Origen', 'Caras externas de las costillas 5.ª–12.ª'], ['Inserción', 'Línea alba, tubérculo del pubis y mitad anterior de la cresta ilíaca'], ['Inervación', 'Nervios toracoabdominales (T7–T11) y subcostal (T12)'], ['Acción', 'Comprime el abdomen; flexión del tronco; inclinación al mismo lado y rotación del tronco hacia el lado opuesto; espiración forzada']],
     c: 'La debilidad de la pared en la región inguinal permite la aparición de hernias inguinales.',
   },
+  'musculo-trapecio': {
+    n: 'Trapecio (músculo)', la: 'Musculus trapezius', g: 'm', reg: 'Espalda y cuello',
+    d: 'Músculo plano y triangular, el más superficial de la parte superior de la espalda; los dos juntos tienen forma de trapecio. Tiene fibras descendentes (superiores), transversas (medias) y ascendentes (inferiores).',
+    t: [['Origen', 'Línea nucal superior, protuberancia occipital externa, ligamento nucal y apófisis espinosas de C7–T12'], ['Inserción', 'Tercio lateral de la clavícula, acromion y espina de la escápula'], ['Inervación', 'Nervio accesorio (XI par craneal); ramos de C3–C4'], ['Acción', 'Fibras superiores: elevan la escápula (encoger los hombros) y la rotan hacia arriba. Medias: la retraen. Inferiores: la descienden. Junto con el serrato anterior rota la escápula para elevar el brazo por encima de la cabeza; extiende el cuello']],
+    c: 'La lesión del nervio accesorio (por ejemplo, en cirugía de ganglios cervicales) produce debilidad para encoger el hombro y caída del hombro.',
+  },
   'dorsal-ancho': {
     n: 'Dorsal ancho', la: 'Musculus latissimus dorsi', g: 'm', reg: 'Espalda',
     d: 'Músculo plano y muy extenso que cubre la parte inferior de la espalda y converge en un tendón hacia el húmero. Forma el pliegue posterior de la axila.',
@@ -72,8 +78,8 @@ export default {
     k: ['En proporción a su tamaño, es uno de los músculos más fuertes del cuerpo'],
     c: 'Su hipertrofia es frecuente en personas con bruxismo.',
   },
-  temporal: {
-    n: 'Temporal (músculo)', la: 'Musculus temporalis', g: 'm', reg: 'Lateral del cráneo',
+  'musculo-temporal': {
+    n: 'Músculo temporal', la: 'Musculus temporalis', g: 'm', reg: 'Lateral del cráneo',
     d: 'Músculo en abanico que ocupa la fosa temporal. Sus fibras convergen en un tendón que pasa por debajo del arco cigomático.',
     t: [['Origen', 'Fosa temporal y fascia temporal'], ['Inserción', 'Apófisis coronoides y borde anterior de la rama mandibular'], ['Inervación', 'Nervios temporales profundos (V3)'], ['Acción', 'Eleva la mandíbula; sus fibras posteriores la retraen']],
   },
